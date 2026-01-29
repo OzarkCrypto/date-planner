@@ -1,10 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 const modeDescriptions = {
   1: {
     name: '소박한 노포',
@@ -19,12 +15,24 @@ const modeDescriptions = {
   3: {
     name: '기념일 스페셜',
     budget: '1인당 SGD 100+',
-    vibe: '파인다이닝급, 특별한 날을 위한 고급 레스토랑',
+    vibe: '파인다이닝급, 특별한 날을 위한 고급 레스토랥',
   },
 };
 
 export async function POST(request) {
   try {
+    // Check if API key exists
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json(
+        { error: 'ANTHROPIC_API_KEY not configured' },
+        { status: 500 }
+      );
+    }
+
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+
     const { mode } = await request.json();
     
     if (!mode || !modeDescriptions[mode]) {
@@ -44,7 +52,7 @@ export async function POST(request) {
 
 3개의 코스를 추천해줘. 각 코스는 다음 형식으로:
 
-**코스 1: [테마 이름]**
+**코스 1: [테마 이릁]**
 🍽️ 식사: [장소명] - [간단 설명, 추천 메뉴, 대략적 가격]
 ☕ 카페: [장소명] - [간단 설명]
 🎯 활동 (선택): [장소명] - [간단 설명]
@@ -69,7 +77,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate recommendation' },
+      { error: `Failed: ${error.message}` },
       { status: 500 }
     );
   }
